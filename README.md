@@ -4,17 +4,14 @@ the template syntax of Vue.js for simplicity and familiarity.
 ## Example
 
 ```java
-var templateStr = "<div><p v-for='name in nameList' :first-name='name'>Hello {{name}}</p></div>";
-
-//Compile the template. This needs to be done only once.
+var templateStr = "<div>{{name}}</div>";
+//Compile the template. This is a one-time thing.
 var template = Zippy.compile(templateStr);
 
-//Evaluate the template. This can be done many times.
+//Evaluate the template.
+var ctx = new HashMap<String, Object>();
 
-Map<String, Object> ctx = new HashMap<>();
-var nameList = Arrays.asList("Daffy", "Bugs");
-
-ctx.put("nameList", nameList);
+ctx.put("name", "Daffy Duck");
 
 var out = Zippy.evalAsString(template, ctx);
 ```
@@ -22,10 +19,7 @@ var out = Zippy.evalAsString(template, ctx);
 This will produce an output like this.
 
 ```html
-<div>
-    <p first-name="Daffy">Hello Daffy</p>
-    <p first-name="Bugs">Hello Bugs</p>
-</div>
+<div>Daffy Duck</div>
 ```
 
 ## Attribute Binding
@@ -100,3 +94,37 @@ This will produce an output like this.
 <div>
 </div>
 ```
+
+## Looping
+
+Use ``v-for`` to loop over a ``List`` or array and repeatedly generate elemenets.
+
+
+```java
+var templateStr = "<div><p v-for='name in nameList' :first-name='name'>Hello {{name}}</p></div>";
+
+//Compile the template. This needs to be done only once.
+var template = Zippy.compile(templateStr);
+
+//Evaluate the template. This can be done many times.
+
+Map<String, Object> ctx = new HashMap<>();
+var nameList = Arrays.asList("Daffy", "Bugs");
+
+ctx.put("nameList", nameList);
+
+var out = Zippy.evalAsString(template, ctx);
+```
+
+This will produce an output like this.
+
+```html
+<div>
+    <p first-name="Daffy">Hello Daffy</p>
+    <p first-name="Bugs">Hello Bugs</p>
+</div>
+```
+
+Avoid using ``v-for`` and ``v-if`` for the same element. If you do then ``v-if`` may not have access to
+the loop variable defined in ``v-for``. This is because the DOM parser does not guarantee
+the ordering of the attributes and ``v-if`` may be processed before ``v-for``.
