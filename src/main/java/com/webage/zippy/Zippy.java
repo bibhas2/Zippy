@@ -149,10 +149,10 @@ public class Zippy {
                 var list = expr.evaluate(jexlCtx);
 
                 if (list.getClass().isArray()) {
-                    list = Arrays.asList(list);
+                    loopIterator = Arrays.stream((Object[])list).iterator();
+                } else {
+                    loopIterator = ((List<?>)list).iterator();
                 }
-
-                loopIterator = ((List<?>)list).iterator();
 
                 if (loopIterator.hasNext()) {
                     var loopItem = loopIterator.next();

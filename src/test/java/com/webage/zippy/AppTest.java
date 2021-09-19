@@ -51,6 +51,23 @@ public class AppTest {
     }
 
     @Test
+    public void loopWithArrayTest() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("AA.html")) {
+            String nameList[] = {"Daffy", "Bugs"};
+            var template = Zippy.compile(in);
+    
+            ctx.put("nameList", nameList);
+    
+            System.out.println(Zippy.evalAsString(template, ctx));
+
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("div");
+    
+            assertEquals(nameList.length, childList.getLength());                
+        }
+    }
+
+    @Test
     public void forWithIfTest() throws Exception {
         try (var in = getClass().getClassLoader().getResourceAsStream("AB.html")) {
             var nameList = Arrays.asList("Daffy", "Bugs");
@@ -95,7 +112,7 @@ public class AppTest {
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("div");
     
-            assertEquals(nameList.size(), childList.getLength());                
+            assertEquals(nameList.size(), childList.getLength());
         }
     }
 

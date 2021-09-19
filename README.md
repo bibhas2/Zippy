@@ -22,6 +22,13 @@ This will produce an output like this.
 <div>Daffy Duck</div>
 ```
 
+## Main Features
+
+- Minimal external dependency.
+- Rich expression language using the Apache Commons JEXL library.
+- Sufficient to generate good quality dynamic HTML for emails. This may be a more
+lightweight choice than Thymeleaf, Velocity etc.
+
 ## Attribute Binding
 Attributes that need to show a dynamic value must be prefixed with ":". This prefix is stripped out in the output.
 
