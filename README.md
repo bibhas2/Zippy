@@ -145,5 +145,5 @@ You can use ``v-for`` and ``v-if`` for the same element. Example:
         </div>
     </body>
 </html>
-```html
+```
 
