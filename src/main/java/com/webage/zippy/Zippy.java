@@ -30,19 +30,40 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
+
+/**
+ * A barebones templating system with minimal external dependencies. It is designed mainly
+ * to create dynamic HTML for emails.
+ */
 public class Zippy {
     static JexlEngine jexl = new JexlBuilder().create();
     static Pattern pattern = Pattern.compile("\\{\\{([^\\{\\}]*)\\}\\}");
     
+    /**
+     * Compiles a template. The template must be a valid XML since we use the DOM parser
+     * to process it. All the expressions are pre-procssed as much as possible so that 
+     * subsequent evaluation runs quickly.
+     * 
+     * @param template the template.
+     * @return The template as a DOM documnt. It can be later evaluated from multiple threads.
+     * @throws Exception
+     */
     public static Document compile(String template) throws Exception {
         try (var in = new ByteArrayInputStream(template.getBytes())) {
             return compile(in);
         }
     }
 
+    /**
+     * Compiles a template. The template must be a valid XML since we use the DOM parser
+     * to process it. All the expressions are pre-procssed as much as possible so that 
+     * subsequent evaluation runs quickly.
+     * 
+     * @param input A stream pointing to the template.
+     * @return The template as a DOM documnt. It can be later evaluated from multiple threads.
+     * @throws Exception
+     */
     public static Document compile(InputStream input) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder(); 
@@ -53,6 +74,14 @@ public class Zippy {
         return doc;
     }
 
+    /**
+     * Evaluate a pre-compiled template.
+     * 
+     * @param template The pre-compiled template.
+     * @param context All dynamic data is supplied here.
+     * @return The output as a DOM document.
+     * @throws Exception
+     */
     public static Document eval(Document template, Map<String,Object> context) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder(); 
@@ -64,11 +93,19 @@ public class Zippy {
         return doc;
     }
 
+    /**
+     * Evaluate a pre-compiled template and return the result as a String.
+     * 
+     * @param template The pre-compiled template.
+     * @param context All dynamic data is supplied here.
+     * @return The output as a String.
+     * @throws Exception
+     */
     public static String evalAsString(Document template, Map<String,Object> context) throws Exception {
         return DOMtoString(eval(template, context));
     }
 
-    public static String DOMtoString(Document doc) throws Exception {
+    private static String DOMtoString(Document doc) throws Exception {
         TransformerFactory transfac = TransformerFactory.newInstance();
         Transformer trans = transfac.newTransformer();
         trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");

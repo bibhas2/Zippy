@@ -2,22 +2,15 @@ package com.webage.zippy;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
-/**
- * Unit test for simple App.
- */
+
 public class AppTest {
     Map<String, Object> ctx = new HashMap<>();
 
