@@ -57,6 +57,21 @@ public class AppTest {
     }
 
     @Test
+    public void resourceTest() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("AA.html")) {
+            var nameList = Arrays.asList("Daffy", "Bugs");
+            var template = Zippy.compile(in);
+    
+            ctx.put("nameList", nameList);
+    
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("div");
+    
+            assertEquals(nameList.size(), childList.getLength());                
+        }
+    }
+
+    @Test
     public void ifTest() throws Exception {
         var templateStr = "<div>Hello <p v-if='age == 12' :a='firstName'>OK</p><p v-if='age != 12'>BAD</p></div>";
         var template = Zippy.compile(templateStr);
