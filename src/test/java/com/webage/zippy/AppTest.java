@@ -31,7 +31,7 @@ public class AppTest {
     @Test
     public void basicLoopTest() throws Exception {
         var nameList = Arrays.asList("Daffy", "Bugs");
-        var templateStr = "<div><p v-for='n in nameList' :name='n'></p></div>";
+        var templateStr = "<div><p v-for='n  in   nameList' :name='n'></p></div>";
         var template = Zippy.compile(templateStr);
 
         ctx.put("nameList", nameList);
@@ -39,11 +39,21 @@ public class AppTest {
         var out = Zippy.eval(template, ctx);
         var childList = out.getElementsByTagName("p");
 
+        assertEquals(nameList.size(), childList.getLength());
+
         for (int i = 0; i < childList.getLength(); ++i) {
             var child = (Element) childList.item(i);
 
             assertEquals(nameList.get(i), child.getAttribute("name"));
         }
+
+        //Repeat eval
+        nameList = Arrays.asList("Daffy", "Bugs", "Sylvester");
+        ctx.put("nameList", nameList);
+        out = Zippy.eval(template, ctx);
+        childList = out.getElementsByTagName("p");
+
+        assertEquals(nameList.size(), childList.getLength());
     }
 
     @Test
