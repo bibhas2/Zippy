@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,6 +24,24 @@ public class AppTest {
         ctx.put("firstName", "Daffy");
         ctx.put("lastName", "Duck");
         ctx.put("age", 12);
+    }
+
+    @Test
+    public void basicLoopTest() throws Exception {
+        var nameList = Arrays.asList("Daffy", "Bugs");
+        var templateStr = "<div><p v-for='n in nameList' :name='n'></p></div>";
+        var template = Zippy.compile(templateStr);
+
+        ctx.put("nameList", nameList);
+
+        var out = Zippy.eval(template, ctx);
+        var childList = out.getElementsByTagName("p");
+
+        for (int i = 0; i < childList.getLength(); ++i) {
+            var child = childList.item(i);
+
+            assertEquals(nameList.get(i), child.getNodeValue());
+        }
     }
 
     @Test

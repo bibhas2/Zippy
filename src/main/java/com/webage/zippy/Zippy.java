@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.MatchResult;
@@ -57,7 +59,7 @@ public class Zippy {
         Document doc = db.newDocument();
         JexlContext jc = new MapContext(context);
         
-        evalElement(doc, null, template.getDocumentElement(), jc);
+        evalElement(doc, null, template.getDocumentElement(), jc, true);
 
         return doc;
     }
@@ -81,7 +83,10 @@ public class Zippy {
         return sw.toString();
 	}
 
-    private static void evalElement(Document doc, Element parent, Element templateElement, JexlContext jexlCtx) {
+    private static void evalElement(Document doc, Element parent, Element templateElement, JexlContext jexlCtx, boolean canStartLoop) {
+        String loopVarName = null;
+        Iterator<?> loopIterator = null;
+
         var e = doc.createElement(templateElement.getTagName());
 
         var attrs = templateElement.getAttributes();
@@ -96,7 +101,25 @@ public class Zippy {
                 Boolean result = (Boolean) expr.evaluate(jexlCtx);
 
                 if (result == false) {
-                    return;
+                    return; //Skip the whole element
+                }
+            } else if (canStartLoop && name.equals("v-for")) {
+                loopVarName = (String) attr.getUserData("v-for-var");
+                JexlExpression expr = (JexlExpression) attr.getUserData("v-for-list-expr");
+                var list = expr.evaluate(jexlCtx);
+
+                if (list.getClass().isArray()) {
+                    list = Arrays.asList(list);
+                }
+
+                loopIterator = ((List<?>)list).iterator();
+
+                if (loopIterator.hasNext()) {
+                    var loopItem = loopIterator.next();
+
+                    jexlCtx.set(loopVarName, loopItem);
+                } else {
+                    return; //Skip the whole element
                 }
             } else if (name.startsWith(":")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("expr");
@@ -122,7 +145,7 @@ public class Zippy {
             var child = childNodes.item(i);
 
             if (child.getNodeType() == Node.ELEMENT_NODE) {
-                evalElement(doc, e, (Element) child, jexlCtx);
+                evalElement(doc, e, (Element) child, jexlCtx, true);
             } else if (child.getNodeType() == Node.TEXT_NODE) {
                 List<MatchResult> matchResults = (List<MatchResult>) child.getUserData("matchResults");
                 List<JexlExpression> exprList = (List<JexlExpression>) child.getUserData("expressionList");
@@ -148,9 +171,17 @@ public class Zippy {
                 e.appendChild(doc.importNode(child, false));
             }
         }
+
+        while (canStartLoop && loopIterator != null && loopIterator.hasNext()) {
+            var loopItem = loopIterator.next();
+
+            jexlCtx.set(loopVarName, loopItem);
+
+            evalElement(doc, parent, templateElement, jexlCtx, false);
+        }
     }
 
-    private static void compileElement(Element element) throws Exception {
+    private static void compileElement(Element element) {
         var attrs = element.getAttributes();
 
         for (int i = 0; i < attrs.getLength(); ++i) {
@@ -163,6 +194,17 @@ public class Zippy {
                 JexlExpression e = jexl.createExpression(val);
 
                 attr.setUserData("v-if", e, null);
+            } else if (name.equals("v-for")) {
+                var parts = val.split("\\s+");
+
+                if (parts.length != 3 || !parts[1].equals("in")) {
+                    throw new IllegalArgumentException("Invalid expression for v-for: " + val);
+                }
+
+                JexlExpression e = jexl.createExpression(parts[2]);
+
+                attr.setUserData("v-for-var", parts[0], null);
+                attr.setUserData("v-for-list-expr", e, null);
             } else if (name.startsWith(":")) {
                 JexlExpression e = jexl.createExpression(val);
 
@@ -199,6 +241,5 @@ public class Zippy {
                 compileElement((Element) child);
             }
         }
-
     }
 }
