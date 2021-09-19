@@ -84,12 +84,6 @@ public class Zippy {
     private static void evalElement(Document doc, Element parent, Element templateElement, JexlContext jexlCtx) {
         var e = doc.createElement(templateElement.getTagName());
 
-        if (parent != null) {
-            parent.appendChild(e);
-        } else {
-            doc.appendChild(e);
-        }
-
         var attrs = templateElement.getAttributes();
 
         for (int i = 0; i < attrs.getLength(); ++i) {
@@ -97,14 +91,29 @@ public class Zippy {
             var name = attr.getName();
             var val = attr.getNodeValue();
 
-            if (name.startsWith(":")) {
+            if (name.equals("v-if")) {
+                JexlExpression expr = (JexlExpression) attr.getUserData("v-if");
+                Boolean result = (Boolean) expr.evaluate(jexlCtx);
+
+                if (result == false) {
+                    return;
+                }
+            } else if (name.startsWith(":")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("expr");
 
                 val = expr.evaluate(jexlCtx).toString();
                 name = name.substring(1);
-            }
 
-            e.setAttribute(name, val);
+                e.setAttribute(name, val);
+            } else {
+                e.setAttribute(name, val);
+            }
+        }
+
+        if (parent != null) {
+            parent.appendChild(e);
+        } else {
+            doc.appendChild(e);
         }
 
         var childNodes = templateElement.getChildNodes();
@@ -150,7 +159,11 @@ public class Zippy {
             var name = attr.getName();
             var val = attr.getNodeValue();
 
-            if (name.startsWith(":")) {
+            if (name.equals("v-if")) {
+                JexlExpression e = jexl.createExpression(val);
+
+                attr.setUserData("v-if", e, null);
+            } else if (name.startsWith(":")) {
                 JexlExpression e = jexl.createExpression(val);
 
                 attr.setUserData("expr", e, null);

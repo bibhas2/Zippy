@@ -22,6 +22,19 @@ public class AppTest {
     public void setup() {
         ctx.put("firstName", "Daffy");
         ctx.put("lastName", "Duck");
+        ctx.put("age", 12);
+    }
+
+    @Test
+    public void ifTest() throws Exception {
+        var templateStr = "<div>Hello <p v-if='age == 12' :a='firstName'>OK</p><p v-if='age != 12'>BAD</p></div>";
+        var template = Zippy.compile(templateStr);
+
+
+        var out = Zippy.evalAsString(template, ctx);
+        var expected = "<div>Hello <p a=\"Daffy\">OK</p></div>";
+
+        assertEquals(expected, out);
     }
 
     @Test
