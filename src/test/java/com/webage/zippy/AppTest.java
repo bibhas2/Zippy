@@ -25,13 +25,37 @@ public class AppTest {
     }
 
     @Test
+    public void bodyExprTest() throws Exception {
+        var templateStr = "<div>Hello {{firstName + \"::\" + lastName}}</div>";
+        var template = Zippy.compile(templateStr);
+
+
+        var out = Zippy.evalAsString(template, ctx);
+        var expected = "<div>Hello Daffy::Duck</div>";
+
+        assertEquals(expected, out);
+    }
+
+    @Test
     public void bodyTest() throws Exception {
         var templateStr = "<div>Hello there {{firstName}} -- {{lastName}}. How does it go?</div>";
         var template = Zippy.compile(templateStr);
 
 
         var out = Zippy.evalAsString(template, ctx);
-        var expected = "<div>Hello there Daffy -- Duck. How does it go?</div>\n";
+        var expected = "<div>Hello there Daffy -- Duck. How does it go?</div>";
+
+        assertEquals(expected, out);
+    }
+
+    @Test
+    public void bodyNestTest() throws Exception {
+        var templateStr = "<div>Hello {{firstName}} <p>{{lastName}}</p></div>";
+        var template = Zippy.compile(templateStr);
+
+
+        var out = Zippy.evalAsString(template, ctx);
+        var expected = "<div>Hello Daffy <p>Duck</p></div>";
 
         assertEquals(expected, out);
     }
@@ -43,7 +67,7 @@ public class AppTest {
 
 
         var out = Zippy.evalAsString(template, ctx);
-        var expected = "<div a=\"aval\" b=\"Daffy\" c=\"cval\" d=\"Duck\">Hello</div>\n";
+        var expected = "<div a=\"aval\" b=\"Daffy\" c=\"cval\" d=\"Duck\">Hello</div>";
 
         assertEquals(expected, out);
     }
