@@ -2,7 +2,13 @@ package com.webage.zippy;
 
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,9 +28,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 public class Zippy {
     static JexlEngine jexl = new JexlBuilder().create();
+    static Pattern pattern = Pattern.compile("\\{\\{([^\\{\\}]*)\\}\\}");
     
     public static Document compile(InputStream input) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -99,11 +107,29 @@ public class Zippy {
 
             if (child.getNodeType() == Node.ELEMENT_NODE) {
                 evalElement(doc, e, (Element) child, jexlCtx);
+            } else if (child.getNodeType() == Node.TEXT_NODE) {
+                List<MatchResult> matchResults = (List<MatchResult>) child.getUserData("matchResults");
+                List<JexlExpression> exprList = (List<JexlExpression>) child.getUserData("expressionList");
+                int nextStart = 0;
+                var nodeText = child.getNodeValue();
+                StringBuffer buff = new StringBuffer(nodeText.length() + 512);
+
+                for (int j = 0; j < matchResults.size(); ++j) {
+                    var mr = matchResults.get(j);
+                    var expr = exprList.get(j);
+                    var val = expr.evaluate(jexlCtx).toString();
+
+                    buff.append(nodeText.substring(nextStart, mr.start()));
+                    buff.append(val);
+
+                    nextStart = mr.end();
+                }
+
+                e.appendChild(doc.createTextNode(buff.toString()));
             } else {
                 e.appendChild(doc.importNode(child, false));
             }
         }
-
     }
 
     private static void compileElement(Element element) throws Exception {
@@ -115,9 +141,9 @@ public class Zippy {
             var name = attr.getName();
             var val = attr.getNodeValue();
 
-            //System.out.printf("%s=%s\n", name, val);
             if (name.startsWith(":")) {
                 JexlExpression e = jexl.createExpression(val);
+
                 attr.setUserData("expr", e, null);
             }
         }
@@ -126,6 +152,26 @@ public class Zippy {
 
         for (int i = 0; i < childNodes.getLength(); ++i) {
             var child = childNodes.item(i);
+
+            if (child.getNodeType() == Node.TEXT_NODE) {
+                var nodeText = child.getNodeValue();
+                Matcher matcher = pattern.matcher(nodeText);
+                List<JexlExpression> exprList = new ArrayList<>();
+
+                var matchResults = matcher
+                    .results()
+                    .peek(mr -> {
+                        //Strip out the handlebars
+                        var exprTxt = nodeText.substring(mr.start() + 2, mr.end() - 2);
+                        JexlExpression expr = jexl.createExpression(exprTxt);
+
+                        exprList.add(expr);
+                    })
+                    .collect(Collectors.toList());
+
+                child.setUserData("matchResults", matchResults, null);
+                child.setUserData("expressionList", exprList, null);
+            }
 
             if (child.getNodeType() == Node.ELEMENT_NODE) {
                 compileElement((Element) child);
