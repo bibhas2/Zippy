@@ -126,46 +126,48 @@ public class Zippy {
 
         var e = doc.createElement(templateElement.getTagName());
 
-        var attrs = templateElement.getAttributes();
-
         /* 
         Attributes can be returned in any order.
         Process v-if and v-for first. 
         */
-        for (int i = 0; i < attrs.getLength(); ++i) {
-            var attr = (Attr) attrs.item(i);
-            var name = attr.getName();
+        var attr = templateElement.getAttributeNode("v-for");
 
-            if (name.equals("v-if")) {
-                JexlExpression expr = (JexlExpression) attr.getUserData("v-if");
-                Boolean result = (Boolean) expr.evaluate(jexlCtx);
+        if (canStartLoop && attr != null) {
+            loopVarName = (String) attr.getUserData("v-for-var");
+            JexlExpression expr = (JexlExpression) attr.getUserData("v-for-list-expr");
+            var list = expr.evaluate(jexlCtx);
 
-                if (result == false) {
-                    return; //Skip the whole element
-                }
-            } else if (canStartLoop && name.equals("v-for")) {
-                loopVarName = (String) attr.getUserData("v-for-var");
-                JexlExpression expr = (JexlExpression) attr.getUserData("v-for-list-expr");
-                var list = expr.evaluate(jexlCtx);
+            if (list.getClass().isArray()) {
+                loopIterator = Arrays.stream((Object[])list).iterator();
+            } else {
+                loopIterator = ((List<?>)list).iterator();
+            }
 
-                if (list.getClass().isArray()) {
-                    loopIterator = Arrays.stream((Object[])list).iterator();
-                } else {
-                    loopIterator = ((List<?>)list).iterator();
-                }
+            if (loopIterator.hasNext()) {
+                var loopItem = loopIterator.next();
 
-                if (loopIterator.hasNext()) {
-                    var loopItem = loopIterator.next();
-
-                    jexlCtx.set(loopVarName, loopItem);
-                } else {
-                    return; //Skip the whole element
-                }
+                jexlCtx.set(loopVarName, loopItem);
+            } else {
+                return; //Skip the whole element
             }
         }
 
+        attr = templateElement.getAttributeNode("v-if");
+
+        if (attr != null) {
+            JexlExpression expr = (JexlExpression) attr.getUserData("v-if");
+            Boolean result = (Boolean) expr.evaluate(jexlCtx);
+
+            if (result == false) {
+                return; //Skip the whole element
+            }
+        }
+
+        var attrs = templateElement.getAttributes();
+
         for (int i = 0; i < attrs.getLength(); ++i) {
-            var attr = (Attr) attrs.item(i);
+            attr = (Attr) attrs.item(i);
+
             var name = attr.getName();
             var val = attr.getNodeValue();
 

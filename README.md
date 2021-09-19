@@ -132,9 +132,18 @@ This will produce an output like this.
 </div>
 ```
 
-Avoid using ``v-for`` and ``v-if`` for the same element. If you do then ``v-if`` may not have access to
-the loop variable defined in ``v-for``. This is because the DOM parser does not guarantee
-the ordering of the attributes and ``v-if`` may be processed before ``v-for``.
-
 You can use a ``List`` or an array of objects with ``v-for``. Array of promitive types are not
 supported.
+
+You can use ``v-for`` and ``v-if`` for the same element. Example:
+
+```html
+<html>
+    <body>
+        <div v-for="name in nameList" v-if="name == 'Daffy'">
+            <p>{{name}}</p>
+        </div>
+    </body>
+</html>
+```html
+

@@ -57,8 +57,6 @@ public class AppTest {
             var template = Zippy.compile(in);
     
             ctx.put("nameList", nameList);
-    
-            System.out.println(Zippy.evalAsString(template, ctx));
 
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("div");
@@ -76,7 +74,7 @@ public class AppTest {
             ctx.put("nameList", nameList);
     
             var out = Zippy.eval(template, ctx);
-            var childList = out.getElementsByTagName("p");
+            var childList = out.getElementsByTagName("div");
     
             assertEquals(1, childList.getLength());                
         }
