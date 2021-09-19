@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 
 /**
  * Unit test for simple App.
@@ -38,9 +40,9 @@ public class AppTest {
         var childList = out.getElementsByTagName("p");
 
         for (int i = 0; i < childList.getLength(); ++i) {
-            var child = childList.item(i);
+            var child = (Element) childList.item(i);
 
-            assertEquals(nameList.get(i), child.getNodeValue());
+            assertEquals(nameList.get(i), child.getAttribute("name"));
         }
     }
 

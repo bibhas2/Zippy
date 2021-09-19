@@ -91,10 +91,13 @@ public class Zippy {
 
         var attrs = templateElement.getAttributes();
 
+        /* 
+        Attributes can be returned in any order.
+        Process v-if and v-for first. 
+        */
         for (int i = 0; i < attrs.getLength(); ++i) {
             var attr = (Attr) attrs.item(i);
             var name = attr.getName();
-            var val = attr.getNodeValue();
 
             if (name.equals("v-if")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("v-if");
@@ -121,6 +124,18 @@ public class Zippy {
                 } else {
                     return; //Skip the whole element
                 }
+            }
+        }
+
+        for (int i = 0; i < attrs.getLength(); ++i) {
+            var attr = (Attr) attrs.item(i);
+            var name = attr.getName();
+            var val = attr.getNodeValue();
+
+            if (name.equals("v-if")) {
+                //Already processed. Eat it so it does not go to output.
+            } else if (canStartLoop && name.equals("v-for")) {
+                //Already processed. Eat it so it does not go to output.
             } else if (name.startsWith(":")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("expr");
 
