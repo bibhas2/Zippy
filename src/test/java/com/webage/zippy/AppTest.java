@@ -138,25 +138,4 @@ public class AppTest {
 
         assertEquals(expected, out);
     }
-
-    /*
-    @Test
-    public void regexTest() {
-        String text    = "JJ {{This}} is the {{text}} which is to be {{searched}} ";
-
-        String str = "\\{\\{([^\\{\\}]*)\\}\\}";
-        var buff = new StringBuffer();
-        Pattern pattern = Pattern.compile(str);
-        Matcher matcher = pattern.matcher(text);
-
-        while(matcher.find()) {
-            System.out.printf("Starts: %d Ends: %d. %s\n", matcher.start(), matcher.end(), text.substring(matcher.start()+2, matcher.end()-2));
-            matcher.appendReplacement(buff, "HHH");
-        }
-
-        matcher.appendTail(buff);
-
-        System.out.println(buff.toString());
-    }
-    */
 }
