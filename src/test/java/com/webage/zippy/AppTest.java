@@ -2,6 +2,7 @@ package com.webage.zippy;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +62,25 @@ public class AppTest {
             var childList = out.getElementsByTagName("p");
     
             assertEquals(1, childList.getLength());                
+        }
+    }
+
+    @Test
+    public void emptyList() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("AC.html")) {
+            var nameList = new ArrayList<String>();
+            var template = Zippy.compile(in);
+    
+            ctx.put("nameList", nameList);
+    
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("p");
+    
+            assertEquals(nameList.size(), childList.getLength());
+            
+            childList = out.getElementsByTagName("h3");
+    
+            assertEquals(1, childList.getLength());
         }
     }
 
