@@ -1,5 +1,6 @@
 package com.webage.zippy;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -34,6 +35,12 @@ public class Zippy {
     static JexlEngine jexl = new JexlBuilder().create();
     static Pattern pattern = Pattern.compile("\\{\\{([^\\{\\}]*)\\}\\}");
     
+    public static Document compile(String template) throws Exception {
+        try (var in = new ByteArrayInputStream(template.getBytes())) {
+            return compile(in);
+        }
+    }
+
     public static Document compile(InputStream input) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder(); 
@@ -124,6 +131,8 @@ public class Zippy {
 
                     nextStart = mr.end();
                 }
+
+                buff.append(nodeText.substring(nextStart));
 
                 e.appendChild(doc.createTextNode(buff.toString()));
             } else {
