@@ -57,6 +57,21 @@ public class AppTest {
     }
 
     @Test
+    public void forWithIfTest() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("AB.html")) {
+            var nameList = Arrays.asList("Daffy", "Bugs");
+            var template = Zippy.compile(in);
+    
+            ctx.put("nameList", nameList);
+    
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("p");
+    
+            assertEquals(1, childList.getLength());                
+        }
+    }
+
+    @Test
     public void resourceTest() throws Exception {
         try (var in = getClass().getClassLoader().getResourceAsStream("AA.html")) {
             var nameList = Arrays.asList("Daffy", "Bugs");
