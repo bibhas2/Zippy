@@ -171,7 +171,7 @@ public class Zippy {
 
             if (name.equals("v-if")) {
                 //Already processed. Eat it so it does not go to output.
-            } else if (canStartLoop && name.equals("v-for")) {
+            } else if (name.equals("v-for")) {
                 //Already processed. Eat it so it does not go to output.
             } else if (name.startsWith(":")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("expr");
