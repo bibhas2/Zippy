@@ -1,11 +1,34 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.webage</groupId>
+  <groupId>bibhas2.github.io</groupId>
   <artifactId>zippy</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>zippy</name>
+  <description>A minimalistic templating system mainly for generating HTML content for emails.</description>
+  <url>https://github.com/bibhas2/Zippy</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Bibhas B</name>
+      <email>bibhas2@gmail.com</email>
+      <organization>Web Age Solutions Inc.</organization>
+      <organizationUrl>https://webagesolutions.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/bibhas2/Zippy</connection>
+    <developerConnection>scm:git:ssh://github.com/bibhas2/Zippy</developerConnection>
+    <url>github.com/bibhas2/Zippy</url>
+  </scm>  
+
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
 	</properties>
