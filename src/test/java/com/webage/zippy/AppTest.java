@@ -1,6 +1,7 @@
 package com.webage.zippy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,6 +137,22 @@ public class AppTest {
         var expected = "<div>Hello Daffy::Duck</div>";
 
         assertEquals(expected, out);
+    }
+
+    @Test
+    public void inerHTMLTest() throws Exception {
+        var innerTemplate = Zippy.compile("<p id='p1'>Hello</p>");
+        var innerDoc = Zippy.eval(innerTemplate, ctx);
+
+        var templateStr = "<div>{{html}}</div>";
+        var template = Zippy.compile(templateStr);
+
+        ctx.put("html", innerDoc);
+
+        var out = Zippy.eval(template, ctx);
+        var childList = out.getElementsByTagName("p");
+
+        assertEquals(1, childList.getLength());
     }
 
     @Test

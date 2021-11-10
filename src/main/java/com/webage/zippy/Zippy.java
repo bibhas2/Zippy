@@ -205,22 +205,34 @@ public class Zippy {
                 List<JexlExpression> exprList = (List<JexlExpression>) child.getUserData("expressionList");
                 int nextStart = 0;
                 var nodeText = child.getNodeValue();
-                StringBuffer buff = new StringBuffer(nodeText.length() + 512);
 
                 for (int j = 0; j < matchResults.size(); ++j) {
+                    //Info about the of the next {{expr}}.
                     var mr = matchResults.get(j);
                     var expr = exprList.get(j);
-                    var val = expr.evaluate(jexlCtx).toString();
 
-                    buff.append(nodeText.substring(nextStart, mr.start()));
-                    buff.append(val);
+                    //Append plain body text up until the start
+                    //of the {{expr}}.
+                    e.appendChild(doc.createTextNode(nodeText.substring(nextStart, mr.start())));
 
+                    //Evaluate the {{expr}}.
+                    var val = expr.evaluate(jexlCtx);
+
+                    if (val instanceof Document) {
+                        var innerDocElement = ((Document) val).getDocumentElement();
+
+                        e.appendChild(doc.importNode(innerDocElement, true));
+                    } else if (val instanceof Node) {
+                        e.appendChild(doc.importNode((Node) val, true));
+                    } else {
+                        e.appendChild(doc.createTextNode(val.toString()));
+                    }
+                    
                     nextStart = mr.end();
                 }
 
-                buff.append(nodeText.substring(nextStart));
-
-                e.appendChild(doc.createTextNode(buff.toString()));
+                //Add the remaining plain body text.
+                e.appendChild(doc.createTextNode(nodeText.substring(nextStart)));
             } else {
                 e.appendChild(doc.importNode(child, false));
             }
