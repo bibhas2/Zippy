@@ -38,12 +38,10 @@ var templateStr = "<div>{{name}}</div>";
 var template = Zippy.compile(templateStr);
 ```
 
-Or you can load the template from an ``InputStream``. A common usage is to load the template from the classpath.
+A common usage is to load a template file from the classpath.
 
 ```java
-try (var is = getClass().getClassLoader().getResourceAsStream("my-template.html")) {
-    var template = Zippy.compile(is);
-}
+var template = Zippy.compileResource("my-template.html");
 ```
 
 Note that a template must be a valid XML. HTML is a relaxed form of XML. A valid HTML is not necessarily a valid XML. For example the HTML below is not a valid XML because the attribute values are not quoted.

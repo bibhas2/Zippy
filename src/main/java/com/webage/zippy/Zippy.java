@@ -75,6 +75,19 @@ public class Zippy {
     }
 
     /**
+     * Compiles a templte file from the classpath.
+     * 
+     * @param template The template file name. It must exist in the classpath.
+     * @return The template as a DOM document. It can be later evaluated from multiple threads.
+     * @throws Exception
+     */
+    public static Document compileResource(String template) throws Exception {
+        try (var is = Zippy.class.getClassLoader().getResourceAsStream(template)) {
+            return Zippy.compile(is);
+        }
+    }
+
+    /**
      * Evaluate a pre-compiled template.
      * 
      * @param template The pre-compiled template.
