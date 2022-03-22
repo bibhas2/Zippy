@@ -83,6 +83,10 @@ public class Zippy {
      */
     public static Document compileResource(String template) throws Exception {
         try (var is = Zippy.class.getClassLoader().getResourceAsStream(template)) {
+            if (is == null) {
+                throw new IllegalArgumentException("Failed to load template from classpath: " + template);
+            }
+            
             return Zippy.compile(is);
         }
     }
@@ -231,7 +235,9 @@ public class Zippy {
                     //Evaluate the {{expr}}.
                     var val = expr.evaluate(jexlCtx);
 
-                    if (val instanceof Document) {
+                    if (val == null) {
+                        //Do nothing
+                    } else if (val instanceof Document) {
                         var innerDocElement = ((Document) val).getDocumentElement();
 
                         e.appendChild(doc.importNode(innerDocElement, true));
