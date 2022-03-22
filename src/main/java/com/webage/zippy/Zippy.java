@@ -83,6 +83,10 @@ public class Zippy {
      */
     public static Document compileResource(String template) throws Exception {
         try (var is = Zippy.class.getClassLoader().getResourceAsStream(template)) {
+            if (is == null) {
+                throw new IllegalArgumentException("Failed to load template from classpath: " + template);
+            }
+            
             return Zippy.compile(is);
         }
     }
