@@ -235,7 +235,9 @@ public class Zippy {
                     //Evaluate the {{expr}}.
                     var val = expr.evaluate(jexlCtx);
 
-                    if (val instanceof Document) {
+                    if (val == null) {
+                        //Do nothing
+                    } else if (val instanceof Document) {
                         var innerDocElement = ((Document) val).getDocumentElement();
 
                         e.appendChild(doc.importNode(innerDocElement, true));

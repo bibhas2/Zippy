@@ -190,4 +190,17 @@ public class AppTest {
 
         assertEquals(expected, out);
     }
+
+    @Test
+    public void nullValueTest() throws Exception {
+        var templateStr = "<div>Hello {{salary}} there!</div>";
+        var template = Zippy.compile(templateStr);
+
+        ctx.put("salary", null);
+
+        var out = Zippy.evalAsString(template, ctx);
+        var expected = "<div>Hello  there!</div>";
+
+        assertEquals(expected, out);
+    }
 }
