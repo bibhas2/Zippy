@@ -29,6 +29,18 @@ This will produce an output like this.
 - Sufficient to generate good quality dynamic HTML for emails. This may be a more
 lightweight choice than Thymeleaf, Velocity etc.
 
+## Using Zippy
+
+Add this dependency to your ``pom.xml``.
+
+```xml
+<dependency>
+    <groupId>io.github.bibhas2</groupId>
+    <artifactId>zippy</artifactId>
+    <version>1.1.2</version>
+</dependency>
+```
+
 ## Compiling a Template
 You can supply the template as a plain string.
 
