@@ -2,6 +2,7 @@ package com.webage.zippy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,5 +203,12 @@ public class AppTest {
         var expected = "<div>Hello  there!</div>";
 
         assertEquals(expected, out);
+    }
+
+    @Test
+    public void testImg() throws Exception {
+        var template = Zippy.compileResource("img.html");
+
+        assertTrue(Zippy.evalAsString(template, ctx).contains("<img src=\"url\"/>"));
     }
 }

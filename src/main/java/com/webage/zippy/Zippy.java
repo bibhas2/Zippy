@@ -126,6 +126,7 @@ public class Zippy {
         TransformerFactory transfac = TransformerFactory.newInstance();
         Transformer trans = transfac.newTransformer();
         trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        trans.setOutputProperty(OutputKeys.METHOD, "xml");
         //trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
         // create string from xml tree
