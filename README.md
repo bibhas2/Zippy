@@ -206,6 +206,39 @@ You can use ``v-for`` and ``v-if`` for the same element. Example:
 </html>
 ```
 
+## Showing Dynamic HTML as Child
+The ``{{ }}`` construct escapes any HTML syntax. For example, the following code:
+
+```java
+var template = Zippy.compile("<div>{{message}}</div>");
+
+ctx.put("message", "<h1>Hello</h1>");
+
+System.out.println(Zippy.evalAsString(template, ctx));
+```
+
+Will output:
+
+```xml
+<div>&lt;h1&gt;Hello&lt;/h1&gt;</div>
+```
+
+If you have dynamic HTML in a String and need to show it then use the ``v-html`` attribute. 
+
+```java
+var template = Zippy.compile("<div v-html=\"message\"></div>");
+
+ctx.put("message", "<h1>Hello</h1>");
+
+System.out.println(Zippy.evalAsString(template, ctx));
+```
+
+This will produce:
+
+```xml
+<div><h1>Hello</h1></div>
+```
+
 ## Inserting Shared Content
 You can insert the content from one template inside the content from another template. This is useful to create shared content used by multiple templates.
 

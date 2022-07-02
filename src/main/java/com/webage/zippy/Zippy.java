@@ -1,10 +1,13 @@
 package com.webage.zippy;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -30,6 +34,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -193,6 +198,12 @@ public class Zippy {
                 //Already processed. Eat it so it does not go to output.
             } else if (name.equals("v-for")) {
                 //Already processed. Eat it so it does not go to output.
+            } else if (name.equals("v-html")) {
+                JexlExpression expr = (JexlExpression) attr.getUserData("v-html");
+                
+                val = expr.evaluate(jexlCtx).toString();
+
+                setInnerXML(doc, e, val);
             } else if (name.startsWith(":")) {
                 JexlExpression expr = (JexlExpression) attr.getUserData("expr");
 
@@ -267,6 +278,28 @@ public class Zippy {
         }
     }
 
+    private static void setInnerXML(Document doc, Element e, String val) {
+        var streams = Arrays.asList(
+            new ByteArrayInputStream("<v-html-root>".getBytes()),
+            new ByteArrayInputStream(val.getBytes()),
+            new ByteArrayInputStream("</v-html-root>".getBytes())
+        );
+
+        try (var is = new SequenceInputStream(Collections.enumeration(streams))) {
+            var innerDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+            var innerRoot = innerDoc.getDocumentElement();
+            var innerChildList = innerRoot.getChildNodes();
+
+            for (int i = 0; i < innerChildList.getLength(); ++i) {
+                var innerChild = doc.importNode(innerChildList.item(i), true);
+
+                e.appendChild(innerChild);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     private static void compileElement(Element element) {
         var attrs = element.getAttributes();
 
@@ -291,6 +324,10 @@ public class Zippy {
 
                 attr.setUserData("v-for-var", parts[0], null);
                 attr.setUserData("v-for-list-expr", e, null);
+            } else if (name.equals("v-html")) {
+                JexlExpression e = jexl.createExpression(val);
+
+                attr.setUserData("v-html", e, null);
             } else if (name.startsWith(":")) {
                 JexlExpression e = jexl.createExpression(val);
 

@@ -211,4 +211,22 @@ public class AppTest {
 
         assertTrue(Zippy.evalAsString(template, ctx).contains("<img src=\"url\"/>"));
     }
+
+    @Test
+    public void testInnerHTML() throws Exception {
+        var template = Zippy.compile("<div v-html=\"message\"></div>");
+
+        ctx.put("message", "<h1>Hello</h1><p>Para <b>bold</b></p>");
+
+        assertEquals("<div><h1>Hello</h1><p>Para <b>bold</b></p></div>", Zippy.evalAsString(template, ctx));
+    }
+
+    @Test
+    public void testInnerHTML2() throws Exception {
+var template = Zippy.compile("<div v-html=\"message\"></div>");
+
+ctx.put("message", "<h1>Hello</h1>");
+
+System.out.println(Zippy.evalAsString(template, ctx));
+    }
 }
