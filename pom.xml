@@ -4,7 +4,7 @@
   <groupId>io.github.bibhas2</groupId>
   <artifactId>zippy</artifactId>
   <packaging>jar</packaging>
-  <version>1.1.2</version>
+  <version>1.1.4</version>
   <name>zippy</name>
   <description>A minimalistic templating system mainly for generating HTML content for emails.</description>
   <url>https://github.com/bibhas2/Zippy</url>

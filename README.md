@@ -29,6 +29,18 @@ This will produce an output like this.
 - Sufficient to generate good quality dynamic HTML for emails. This may be a more
 lightweight choice than Thymeleaf, Velocity etc.
 
+## Using Zippy
+
+Add this dependency to your ``pom.xml``.
+
+```xml
+<dependency>
+    <groupId>io.github.bibhas2</groupId>
+    <artifactId>zippy</artifactId>
+    <version>1.1.2</version>
+</dependency>
+```
+
 ## Compiling a Template
 You can supply the template as a plain string.
 
@@ -192,6 +204,39 @@ You can use ``v-for`` and ``v-if`` for the same element. Example:
         </div>
     </body>
 </html>
+```
+
+## Showing Dynamic HTML as Child
+The ``{{ }}`` construct escapes any HTML syntax. For example, the following code:
+
+```java
+var template = Zippy.compile("<div>{{message}}</div>");
+
+ctx.put("message", "<h1>Hello</h1>");
+
+System.out.println(Zippy.evalAsString(template, ctx));
+```
+
+Will output:
+
+```xml
+<div>&lt;h1&gt;Hello&lt;/h1&gt;</div>
+```
+
+If you have dynamic HTML in a String and need to show it then use the ``v-html`` attribute. 
+
+```java
+var template = Zippy.compile("<div v-html=\"message\"></div>");
+
+ctx.put("message", "<h1>Hello</h1>");
+
+System.out.println(Zippy.evalAsString(template, ctx));
+```
+
+This will produce:
+
+```xml
+<div><h1>Hello</h1></div>
 ```
 
 ## Inserting Shared Content
