@@ -231,12 +231,6 @@ public class Zippy {
             }
         }
 
-        if (parent != null) {
-            parent.appendChild(e);
-        } else {
-            doc.appendChild(e);
-        }
-
         var childNodes = templateElement.getChildNodes();
 
         for (int i = 0; i < childNodes.getLength(); ++i) {
@@ -282,6 +276,12 @@ public class Zippy {
             } else {
                 e.appendChild(doc.importNode(child, false));
             }
+        }
+
+        if (parent != null) {
+            parent.appendChild(e);
+        } else {
+            doc.appendChild(e);
         }
 
         while (canStartLoop && loopIterator != null && loopIterator.hasNext()) {
