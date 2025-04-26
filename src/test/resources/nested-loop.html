@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <div v-for="v1 in list1">
+            {{v1}}
+            <div v-for="v2 in list2">
+                {{v2}}
+                <div v-for="v1 in list1">
+                    {{v1}}
+                    <div v-for="v2 in list2">
+                        <p>{{v2}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

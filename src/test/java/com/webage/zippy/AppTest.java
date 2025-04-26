@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
-
 public class AppTest {
     Map<String, Object> ctx = new HashMap<>();
 
@@ -43,7 +42,7 @@ public class AppTest {
             assertEquals(nameList.get(i), child.getAttribute("name"));
         }
 
-        //Repeat eval
+        // Repeat eval
         nameList = Arrays.asList("Daffy", "Bugs", "Sylvester");
         ctx.put("nameList", nameList);
         out = Zippy.eval(template, ctx);
@@ -55,15 +54,32 @@ public class AppTest {
     @Test
     public void loopWithArrayTest() throws Exception {
         try (var in = getClass().getClassLoader().getResourceAsStream("AA.html")) {
-            String nameList[] = {"Daffy", "Bugs"};
+            String nameList[] = { "Daffy", "Bugs" };
             var template = Zippy.compile(in);
-    
+
             ctx.put("nameList", nameList);
 
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("div");
-    
-            assertEquals(nameList.length, childList.getLength());                
+
+            assertEquals(nameList.length, childList.getLength());
+        }
+    }
+
+    @Test
+    public void nestedLoopTest() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("nested-loop.html")) {
+            String list1[] = { "Daffy", "Bugs" };
+            Integer list2[] = { 1, 2, 3 };
+            var template = Zippy.compile(in);
+
+            ctx.put("list1", list1);
+            ctx.put("list2", list2);
+
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("p");
+
+            assertEquals(list1.length * list1.length * list2.length * list2.length, childList.getLength());
         }
     }
 
@@ -72,13 +88,13 @@ public class AppTest {
         try (var in = getClass().getClassLoader().getResourceAsStream("AB.html")) {
             var nameList = Arrays.asList("Daffy", "Bugs");
             var template = Zippy.compile(in);
-    
+
             ctx.put("nameList", nameList);
-    
+
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("div");
-    
-            assertEquals(1, childList.getLength());                
+
+            assertEquals(1, childList.getLength());
         }
     }
 
@@ -87,16 +103,16 @@ public class AppTest {
         try (var in = getClass().getClassLoader().getResourceAsStream("AC.html")) {
             var nameList = new ArrayList<String>();
             var template = Zippy.compile(in);
-    
+
             ctx.put("nameList", nameList);
-    
+
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("p");
-    
+
             assertEquals(nameList.size(), childList.getLength());
-            
+
             childList = out.getElementsByTagName("h3");
-    
+
             assertEquals(1, childList.getLength());
         }
     }
@@ -106,12 +122,12 @@ public class AppTest {
         try (var in = getClass().getClassLoader().getResourceAsStream("AA.html")) {
             var nameList = Arrays.asList("Daffy", "Bugs");
             var template = Zippy.compile(in);
-    
+
             ctx.put("nameList", nameList);
-    
+
             var out = Zippy.eval(template, ctx);
             var childList = out.getElementsByTagName("div");
-    
+
             assertEquals(nameList.size(), childList.getLength());
         }
     }
@@ -120,7 +136,6 @@ public class AppTest {
     public void ifTest() throws Exception {
         var templateStr = "<div>Hello <p v-if='age == 12' :a='firstName'>OK</p><p v-if='age != 12'>BAD</p></div>";
         var template = Zippy.compile(templateStr);
-
 
         var out = Zippy.evalAsString(template, ctx);
         var expected = "<div>Hello <p a=\"Daffy\">OK</p></div>";
@@ -132,7 +147,6 @@ public class AppTest {
     public void bodyExprTest() throws Exception {
         var templateStr = "<div>Hello {{firstName + \"::\" + lastName}}</div>";
         var template = Zippy.compile(templateStr);
-
 
         var out = Zippy.evalAsString(template, ctx);
         var expected = "<div>Hello Daffy::Duck</div>";
@@ -161,7 +175,6 @@ public class AppTest {
         var templateStr = "<div>Hello there {{firstName}} -- {{lastName}}. How does it go?</div>";
         var template = Zippy.compile(templateStr);
 
-
         var out = Zippy.evalAsString(template, ctx);
         var expected = "<div>Hello there Daffy -- Duck. How does it go?</div>";
 
@@ -173,7 +186,6 @@ public class AppTest {
         var templateStr = "<div>Hello {{firstName}} <p>{{lastName}}</p></div>";
         var template = Zippy.compile(templateStr);
 
-
         var out = Zippy.evalAsString(template, ctx);
         var expected = "<div>Hello Daffy <p>Duck</p></div>";
 
@@ -184,7 +196,6 @@ public class AppTest {
     public void attrTest() throws Exception {
         var templateStr = "<div a='aval' :b='firstName' c='cval' :d='lastName'>Hello</div>";
         var template = Zippy.compile(templateStr);
-
 
         var out = Zippy.evalAsString(template, ctx);
         var expected = "<div a=\"aval\" b=\"Daffy\" c=\"cval\" d=\"Duck\">Hello</div>";
@@ -223,10 +234,10 @@ public class AppTest {
 
     @Test
     public void testInnerHTML2() throws Exception {
-var template = Zippy.compile("<div v-html=\"message\"></div>");
+        var template = Zippy.compile("<div v-html=\"message\"></div>");
 
-ctx.put("message", "<h1>Hello</h1>");
+        ctx.put("message", "<h1>Hello</h1>");
 
-System.out.println(Zippy.evalAsString(template, ctx));
+        System.out.println(Zippy.evalAsString(template, ctx));
     }
 }
