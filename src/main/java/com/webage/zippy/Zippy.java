@@ -1,7 +1,6 @@
 package com.webage.zippy;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.io.StringWriter;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -34,7 +32,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -143,6 +140,24 @@ public class Zippy {
         return sw.toString();
 	}
 
+    /**
+     * Evaluate a template element. The result of this evaluation is creation of a new
+     * DOM element. If the parent is not null then the new element is added to it as a child. Otherwise,
+     * the new element is added to the document.
+     * 
+     * <p>The tag name of the new element is the same as the template element. The attributes
+     * of the template element are also evaluated and the results are copied to the new element as attributes with the same names.
+     * 
+     * <p>If v-for is used with the template then the element is evaluated repeatedly. To avoid the loop to be restarted from
+     * the beginning, the canStartLoop parameter is used. If it is false then the loop is not started.
+     * 
+     * @param doc The Document that represents the output of evaluation of the template.
+     * @param parent The parent element to which the new element is added. If null then the new element
+     *               is added to the document.
+     * @param templateElement The template element to be evaluated.
+     * @param jexlCtx The JexlContext that contains all the dynamic data.
+     * @param canStartLoop If true then the loop is started. If false then the loop is not started.
+     */
     private static void evalElement(Document doc, Element parent, Element templateElement, JexlContext jexlCtx, boolean canStartLoop) {
         String loopVarName = null;
         Iterator<?> loopIterator = null;
