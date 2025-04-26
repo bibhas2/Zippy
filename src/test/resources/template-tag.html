@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <template v-for="v1 in list1">
+            {{v1}}
+            <template v-for="v2 in list2">
+                {{v2}}
+                <template v-for="v3 in list1">
+                    {{v3}}
+                    <template v-for="v4 in list2">
+                        <p :id="v1 + '-' + v2 + '-' + v3 + '-' + v4">{{v4}}</p>
+                    </template>
+                </template>
+            </template>
+        </template>
+    </body>
+</html>

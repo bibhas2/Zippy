@@ -107,7 +107,7 @@ public class Zippy {
         Document doc = db.newDocument();
         JexlContext jc = new MapContext(context);
         
-        evalElement(doc, null, template.getDocumentElement(), jc, true);
+        evalElement(doc, doc, template.getDocumentElement(), jc, true);
 
         return doc;
     }
@@ -142,8 +142,7 @@ public class Zippy {
 
     /**
      * Evaluate a template element. The result of this evaluation is creation of a new
-     * DOM element. If the parent is not null then the new element is added to it as a child. Otherwise,
-     * the new element is added to the document.
+     * DOM element. 
      * 
      * <p>The tag name of the new element is the same as the template element. The attributes
      * of the template element are also evaluated and the results are copied to the new element as attributes with the same names.
@@ -152,17 +151,14 @@ public class Zippy {
      * the beginning, the canStartLoop parameter is used. If it is false then the loop is not started.
      * 
      * @param doc The Document that represents the output of evaluation of the template.
-     * @param parent The parent element to which the new element is added. If null then the new element
-     *               is added to the document.
+     * @param parent The parent element to which the new element is added. This can be same as the doc parameter.
      * @param templateElement The template element to be evaluated.
      * @param jexlCtx The JexlContext that contains all the dynamic data.
      * @param canStartLoop If true then the loop is started. If false then the loop is not started.
      */
-    private static void evalElement(Document doc, Element parent, Element templateElement, JexlContext jexlCtx, boolean canStartLoop) {
+    private static void evalElement(Document doc, Node parent, Element templateElement, JexlContext jexlCtx, boolean canStartLoop) {
         String loopVarName = null;
         Iterator<?> loopIterator = null;
-
-        var e = doc.createElement(templateElement.getTagName());
 
         /* 
         Attributes can be returned in any order.
@@ -201,34 +197,21 @@ public class Zippy {
             }
         }
 
-        var attrs = templateElement.getAttributes();
+        //This is where all newly created child elements will be added.
+        Node hostElement = null; 
 
-        for (int i = 0; i < attrs.getLength(); ++i) {
-            attr = (Attr) attrs.item(i);
-
-            var name = attr.getName();
-            var val = attr.getNodeValue();
-
-            if (name.equals("v-if")) {
-                //Already processed. Eat it so it does not go to output.
-            } else if (name.equals("v-for")) {
-                //Already processed. Eat it so it does not go to output.
-            } else if (name.equals("v-html")) {
-                JexlExpression expr = (JexlExpression) attr.getUserData("v-html");
-                
-                val = expr.evaluate(jexlCtx).toString();
-
-                setInnerXML(doc, e, val);
-            } else if (name.startsWith(":")) {
-                JexlExpression expr = (JexlExpression) attr.getUserData("expr");
-
-                val = expr.evaluate(jexlCtx).toString();
-                name = name.substring(1);
-
-                e.setAttribute(name, val);
-            } else {
-                e.setAttribute(name, val);
-            }
+        if (templateElement.getTagName().equals("template")) {
+            //For the "template" tag, all newly created child elements will be added to the parent.
+            hostElement = parent;
+        } else {
+            //Create a new element corresponding to the template element.
+            Element e = doc.createElement(templateElement.getTagName());
+            //Transfer all attributes to the new element.
+            transferAttributes(doc, templateElement, e, jexlCtx);
+            //Add the new element to the parent.
+            parent.appendChild(e);
+            //Set the new element as the host element where all new children will be added.
+            hostElement = e;
         }
 
         var childNodes = templateElement.getChildNodes();
@@ -237,7 +220,7 @@ public class Zippy {
             var child = childNodes.item(i);
 
             if (child.getNodeType() == Node.ELEMENT_NODE) {
-                evalElement(doc, e, (Element) child, jexlCtx, true);
+                evalElement(doc, hostElement, (Element) child, jexlCtx, true);
             } else if (child.getNodeType() == Node.TEXT_NODE) {
                 List<MatchResult> matchResults = (List<MatchResult>) child.getUserData("matchResults");
                 List<JexlExpression> exprList = (List<JexlExpression>) child.getUserData("expressionList");
@@ -251,7 +234,7 @@ public class Zippy {
 
                     //Append plain body text up until the start
                     //of the {{expr}}.
-                    e.appendChild(doc.createTextNode(nodeText.substring(nextStart, mr.start())));
+                    hostElement.appendChild(doc.createTextNode(nodeText.substring(nextStart, mr.start())));
 
                     //Evaluate the {{expr}}.
                     var val = expr.evaluate(jexlCtx);
@@ -261,27 +244,21 @@ public class Zippy {
                     } else if (val instanceof Document) {
                         var innerDocElement = ((Document) val).getDocumentElement();
 
-                        e.appendChild(doc.importNode(innerDocElement, true));
+                        hostElement.appendChild(doc.importNode(innerDocElement, true));
                     } else if (val instanceof Node) {
-                        e.appendChild(doc.importNode((Node) val, true));
+                        hostElement.appendChild(doc.importNode((Node) val, true));
                     } else {
-                        e.appendChild(doc.createTextNode(val.toString()));
+                        hostElement.appendChild(doc.createTextNode(val.toString()));
                     }
                     
                     nextStart = mr.end();
                 }
 
                 //Add the remaining plain body text.
-                e.appendChild(doc.createTextNode(nodeText.substring(nextStart)));
+                hostElement.appendChild(doc.createTextNode(nodeText.substring(nextStart)));
             } else {
-                e.appendChild(doc.importNode(child, false));
+                hostElement.appendChild(doc.importNode(child, false));
             }
-        }
-
-        if (parent != null) {
-            parent.appendChild(e);
-        } else {
-            doc.appendChild(e);
         }
 
         while (canStartLoop && loopIterator != null && loopIterator.hasNext()) {
@@ -290,6 +267,38 @@ public class Zippy {
             jexlCtx.set(loopVarName, loopItem);
 
             evalElement(doc, parent, templateElement, jexlCtx, false);
+        }
+    }
+
+    private static void transferAttributes(Document doc, Element templateElement, Element targetElement, JexlContext jexlCtx) {
+        var attrs = templateElement.getAttributes();
+
+        for (int i = 0; i < attrs.getLength(); ++i) {
+            var attr = (Attr) attrs.item(i);
+
+            var name = attr.getName();
+            var val = attr.getNodeValue();
+
+            if (name.equals("v-if")) {
+                //Already processed. Eat it so it does not go to output.
+            } else if (name.equals("v-for")) {
+                //Already processed. Eat it so it does not go to output.
+            } else if (name.equals("v-html")) {
+                JexlExpression expr = (JexlExpression) attr.getUserData("v-html");
+                
+                val = expr.evaluate(jexlCtx).toString();
+
+                setInnerXML(doc, targetElement, val);
+            } else if (name.startsWith(":")) {
+                JexlExpression expr = (JexlExpression) attr.getUserData("expr");
+
+                val = expr.evaluate(jexlCtx).toString();
+                name = name.substring(1);
+
+                targetElement.setAttribute(name, val);
+            } else {
+                targetElement.setAttribute(name, val);
+            }
         }
     }
 

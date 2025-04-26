@@ -240,4 +240,25 @@ public class AppTest {
 
         System.out.println(Zippy.evalAsString(template, ctx));
     }
+
+    @Test
+    public void templateTagTest() throws Exception {
+        try (var in = getClass().getClassLoader().getResourceAsStream("template-tag.html")) {
+            String list1[] = { "one", "two" };
+            Integer list2[] = { 1, 2, 3 };
+            var template = Zippy.compile(in);
+
+            ctx.put("list1", list1);
+            ctx.put("list2", list2);
+
+            System.out.println(Zippy.evalAsString(template, ctx));
+            var out = Zippy.eval(template, ctx);
+            var childList = out.getElementsByTagName("p");
+
+            assertEquals(list1.length * list1.length * list2.length * list2.length, childList.getLength());
+
+            //There should be no template tags in the output
+            assertEquals(0, out.getElementsByTagName("template").getLength());
+        }
+    }
 }

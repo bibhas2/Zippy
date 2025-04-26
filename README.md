@@ -206,6 +206,32 @@ You can use ``v-for`` and ``v-if`` for the same element. Example:
 </html>
 ```
 
+## Element Grouping
+You can group a number of elements inside a ``<template>`` tag. Then, apply ``v-for`` or ``v-if`` to that tag. The ``<template>`` tag itself is not added to the output document. This avoids the need to use an unnecessary ``<div>`` tag to group elements.
+
+Example:
+
+```html
+<div>
+    <template v-for="p in productList">
+        <p>{{p.name}}</p>
+        <p>{{p.price}}</p>
+    </template>
+</div>
+```
+
+This will output something like:
+
+```html
+<div>
+        <p>Baseball Bat</p>
+        <p>$93.88$</p>
+
+        <p>Basketball</p>
+        <p>$16.93$</p>
+</div>
+```
+
 ## Showing Dynamic HTML as Child
 The ``{{ }}`` construct escapes any HTML syntax. For example, the following code:
 
